@@ -1,0 +1,9 @@
+database:
+  connection: 'host=postgres_service port=5432 password=123 user=gis dbname=gis sslmode=disable'
+server:
+  port: ':8080'
+app:
+  jwtSecret: 'mafoevZw2UDf3LRK3I5K8iTdw2MVoE50Ih2fZ4pfF7bg2sytdhz'
+
+cache:
+  address: 'redis:6379'

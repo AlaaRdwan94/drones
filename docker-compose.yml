@@ -1,0 +1,28 @@
+version: "2"
+services:
+  app:
+    container_name: go_service
+    image: golang:1.16-alpine
+    ports:
+      - '8080:8080'
+    volumes:
+          - .:/go/src/go-with-compose
+    working_dir: /go/src/go-with-compose
+    command: go run .
+    depends_on:
+      - postgres
+    links:
+      - redis
+  redis:
+    image: redis:alpine
+  postgres:
+    container_name: postgres_service
+    image: postgres:11.1-alpine
+    ports:
+      - '5555:5432'
+    environment:
+      POSTGRES_USER: 'gis'
+      POSTGRES_PASSWORD: '123'
+      POSTGRESS_DB: 'gis'
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d/
