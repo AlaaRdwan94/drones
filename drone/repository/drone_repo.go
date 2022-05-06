@@ -39,6 +39,12 @@ func (d *DroneRepo) CreateDrone(drone *entity.Drone) (*entity.Drone, error) {
 	return drone, nil
 }
 
+func (d *DroneRepo) GetDronStatusByStatusNum(num int) (*entity.Status , error) {
+	var Status entity.Status
+	d.db.Model(entity.Status{StatusNum: num}).First(&Status)
+	return &Status, nil
+}
+
 func NewDroneRepo(db *gorm.DB, rd *redis.Client) drone.Repositoy {
 	return &DroneRepo{
 		db: db,

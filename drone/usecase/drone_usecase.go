@@ -16,7 +16,8 @@ func (d *DroneUsecase) Register(model *model.DroneData) (*model.DroneData,error)
 	if err != nil {
 		return nil , err
 	}
-	return transformer.GetDroneDataTransform(drone,"IDLE") , nil
+	status , err := d.DroneRepo.GetDronStatusByStatusNum(1)
+	return transformer.GetDroneDataTransform(drone,status.StatusName) , nil
 }
 
 
