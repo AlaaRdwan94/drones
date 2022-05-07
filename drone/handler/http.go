@@ -56,6 +56,7 @@ func (d *DroneHandler) Load(c *gin.Context) {
 	c.JSON(http.StatusCreated,returned)
 }
 
+//Get drone medications
 func (d *DroneHandler) GetDroneMedications(c *gin.Context) {
 
 	c.Writer.Header().Set("Content-Type", "application/json")
@@ -72,13 +73,26 @@ func (d *DroneHandler) GetDroneMedications(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError,err.Error())
 		return
 	}
-	c.JSON(http.StatusCreated,returned)
+	c.JSON(http.StatusAccepted,returned)
 }
+
+//Check avaliable drones for loading
+func (d *DroneHandler) CheckLoadingDrones(c *gin.Context) {
+	
+	returned , err := d.Dusecase.GetLoadingDrone()
+	if err != nil || returned == nil{
+		c.JSON(http.StatusInternalServerError,err.Error())
+		return
+	}
+	c.JSON(http.StatusAccepted,returned)
+}
+
 
 func NewDroneHandler(e *gin.RouterGroup, dus drone.Usecase)  {
 	handler := &DroneHandler{Dusecase: dus}
 	e.POST("/register-drone",handler.RegisterDrone)
 	e.POST("/load",handler.Load)
 	e.GET("/medications",handler.GetDroneMedications)
+	e.GET("/loading-drones",handler.CheckLoadingDrones)
 
 }

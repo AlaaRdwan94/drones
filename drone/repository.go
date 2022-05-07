@@ -11,4 +11,5 @@ type Repositoy interface {
 	GetDroneMedications(serial string) (*[]entity.Medication, error)
 	GetDroneBySerialNum(num string) (*entity.Drone, error)
 	GetSingleMedication(id uint) (*entity.Medication, error)
+	GetLoadingDrone() (*[]entity.Drone, error)
 }

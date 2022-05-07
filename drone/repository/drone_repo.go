@@ -41,6 +41,16 @@ func (d *DroneRepo) GetDroneMedications(serial string) (*[]entity.Medication, er
 	return &Medications, nil
 }
 
+//get all loading drones
+func (d *DroneRepo) GetLoadingDrone() (*[]entity.Drone, error) {
+	Drones := []entity.Drone{}
+	if err := d.db.Where("status = 2").Find(&Drones).Error; err != nil {
+		return nil, err
+	}
+	
+	return &Drones, nil
+}
+
 //get from medications table by ID
 func (d *DroneRepo) GetSingleMedication(id uint) (*entity.Medication, error) {
 	var Medication entity.Medication

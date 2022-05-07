@@ -12,6 +12,24 @@ type DroneUsecase struct {
 	DroneRepo drone.Repositoy
 }
 
+// GetLoadingDrone implements drone.Usecase
+func (d *DroneUsecase) GetLoadingDrone() (*[]model.DroneData, error) {
+	drones, err := d.DroneRepo.GetLoadingDrone()
+	if err != nil {
+		return nil, err
+	}
+	arr := []model.DroneData{}
+	for _, v := range *drones {
+		medications , err := d.DroneRepo.GetDroneMedications(v.SerialNum)
+		if err != nil {
+			return nil, err
+		}
+		data := transformer.GetDroneDataWithMedicationTransform(&v,medications, v.SerialNum)
+		arr = append(arr, *data)
+	}
+	return &arr , nil
+}
+
 // GetDroneMedications implements drone.Usecase
 func (d *DroneUsecase) GetDroneMedications(serial string) (*[]model.MedicationData, error) {
 	mids, err := d.DroneRepo.GetDroneMedications(serial)
@@ -28,7 +46,7 @@ func (d *DroneUsecase) AddMedication(serial string, id uint) (*model.DroneData, 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	medication, err := d.DroneRepo.GetSingleMedication(id)
 	if err != nil {
 		return nil, err
@@ -48,7 +66,7 @@ func (d *DroneUsecase) AddMedication(serial string, id uint) (*model.DroneData, 
 	}
 	drone.Weight = drone.Weight + medication.Weight
 	if drone.Weight < 500 {
-		
+
 		drone, err = d.DroneRepo.UpdateDroneWeight(drone)
 		if err != nil {
 			return nil, err
@@ -64,7 +82,7 @@ func (d *DroneUsecase) AddMedication(serial string, id uint) (*model.DroneData, 
 		DroneSerial:  serial,
 		MedicationID: id,
 	}
-	_ , err = d.DroneRepo.CreateMedication(&obj)
+	_, err = d.DroneRepo.CreateMedication(&obj)
 	if err != nil {
 		return nil, err
 	}
@@ -87,10 +105,10 @@ func (d *DroneUsecase) Register(model *model.DroneData) (*model.DroneData, error
 
 func (d *DroneUsecase) ChangeStatus(serial string, statusNum int) (*model.DroneData, error) {
 	drone := entity.Drone{
-		SerialNum:  serial,
-		Status:     statusNum,
+		SerialNum: serial,
+		Status:    statusNum,
 	}
-	
+
 	new, err := d.DroneRepo.UpdateDroneStatus(&drone)
 	if err != nil {
 		return nil, err

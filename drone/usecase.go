@@ -12,4 +12,5 @@ type Usecase interface {
 	SetDroneToRETURNING(serial string) (*model.DroneData,error) 
 	AddMedication(serial string ,id uint) (*model.DroneData, error)
 	GetDroneMedications(serial string) (*[]model.MedicationData, error)
+	GetLoadingDrone() (*[]model.DroneData, error)
 }
