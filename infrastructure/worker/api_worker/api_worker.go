@@ -3,7 +3,6 @@ package api_worker
 import (
 	"fmt"
 	"task/infrastructure/seeds"
-	"task/infrastructure/worker"
 	"time"
 	"github.com/go-co-op/gocron"
 )
@@ -11,7 +10,6 @@ import (
 func task() {
 	fmt.Println("seed the database cron")
 	seeds.Seed()
-	worker.Historylog("test")
 }
 func RunCron() {
 	s1 := gocron.NewScheduler(time.UTC)

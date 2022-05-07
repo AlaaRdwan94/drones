@@ -3,6 +3,7 @@ package seeds
 import (
 	"task/entity"
 	"task/infrastructure/db"
+	"task/infrastructure/worker"
 	"task/model"
 )
 
@@ -29,6 +30,9 @@ func Seed() {
 	var drone entity.Drone
 	db.GormDB.Select("serial_num").Table(drone.TableName()).Find(&drones)
 	model.InitSerialMap(drones)
+
+	//update drone battery
+	UpdateDroneBattery(db)
 }
 
 func SeedWithMedications(db *db.DB) {
@@ -120,3 +124,18 @@ func SeedWithStatus(db *db.DB) {
 		db.GormDB.Create(&v)
 	}
 }
+
+//update battery if status is loading or returning
+func UpdateDroneBattery(db *db.DB) {
+	// reduse 10% from the battery in status delevering and returning every 1 min
+	if err := db.GormDB.Model(&entity.Drone{}).Where("status = 4 OR status = 6").Update("battery_cap","battery_cap - 10").Error ; err != nil {
+		worker.Historylog("error update battery for all drones...")
+	}
+	drones := []entity.Drone{}
+	if err := db.GormDB.Where("status = 4 OR status = 6").Find(&drones).Error ; err != nil {
+		worker.Historylog("error loading drones for all drones...")
+	}
+	for _, v := range drones {
+		worker.Historylog("Drone with Serial:",v.SerialNum,"Has Battery:",v.BatteryCap,"%")
+	}
+} 

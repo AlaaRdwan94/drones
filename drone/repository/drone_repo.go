@@ -39,6 +39,16 @@ func (d *DroneRepo) CreateDrone(drone *entity.Drone) (*entity.Drone, error) {
 	return drone, nil
 }
 
+//update drone status
+func (d *DroneRepo) UpdateDroneStatus(Drone *entity.Drone) (*entity.Drone , error) {
+	if err := d.db.Model(Drone).Where("serial_num = ?",Drone.SerialNum).Update("status",Drone.Status).Error ; err != nil {
+		return nil, err
+	}
+	return Drone, nil
+}
+
+
+
 func (d *DroneRepo) GetDronStatusByStatusNum(num int) (*entity.Status , error) {
 	var Status entity.Status
 	d.db.Model(entity.Status{StatusNum: num}).First(&Status)
