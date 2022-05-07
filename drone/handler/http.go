@@ -1,13 +1,14 @@
 package handler
 
 import (
-	"task/middleware/auth"
-	"task/model"
-	"task/drone"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"log"
 	"net/http"
+	"task/drone"
+	"task/middleware/auth"
+	"task/model"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type DroneHandler struct {
@@ -24,13 +25,13 @@ func (d *DroneHandler) RegisterDrone(c *gin.Context) {
 	drone.GenerateSerial()
 	returned , err := d.Dusecase.Register(&drone)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,err)
+		c.JSON(http.StatusInternalServerError,err.Error())
 		return
 	}
 
 	token, err := auth.CreateToken(returned.Serial)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized,err)
+		c.JSON(http.StatusUnauthorized,err.Error())
 		return
 	}
 	returned.Token = token
@@ -38,8 +39,46 @@ func (d *DroneHandler) RegisterDrone(c *gin.Context) {
 }
 
 
+//load loads the medication to a drone
+func (d *DroneHandler) Load(c *gin.Context) {
+
+	c.Writer.Header().Set("Content-Type", "application/json")
+	req := model.LoadDroneRequest{}
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+	}
+	
+	returned , err := d.Dusecase.AddMedication(req.Serial ,req.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError,err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated,returned)
+}
+
+func (d *DroneHandler) GetDroneMedications(c *gin.Context) {
+
+	c.Writer.Header().Set("Content-Type", "application/json")
+	type request struct {
+		Serial string `json:"serial"`
+	}
+	req := request{}
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+	}
+	
+	returned , err := d.Dusecase.GetDroneMedications(req.Serial)
+	if err != nil || returned == nil{
+		c.JSON(http.StatusInternalServerError,err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated,returned)
+}
 
 func NewDroneHandler(e *gin.RouterGroup, dus drone.Usecase)  {
 	handler := &DroneHandler{Dusecase: dus}
 	e.POST("/register-drone",handler.RegisterDrone)
+	e.POST("/load",handler.Load)
+	e.GET("/medications",handler.GetDroneMedications)
+
 }

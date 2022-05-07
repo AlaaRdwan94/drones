@@ -126,9 +126,10 @@ func SeedWithStatus(db *db.DB) {
 }
 
 //update battery if status is loading or returning
+//NODE:we assume that the drone uses it's battery only when its status is delivering or returning
 func UpdateDroneBattery(db *db.DB) {
-	// reduse 10% from the battery in status delevering and returning every 1 min
-	if err := db.GormDB.Model(&entity.Drone{}).Where("status = 4 OR status = 6").Update("battery_cap","battery_cap - 10").Error ; err != nil {
+	// reduce 10% from the battery in status delevering and returning every 1 min
+	if err := db.GormDB.Raw("UPDATE drones SET battery_cap = battery_cap - 10 WHERE status = 4 OR status = 6").Scan(&[]entity.Drone{}).Error ; err != nil {
 		worker.Historylog("error update battery for all drones...")
 	}
 	drones := []entity.Drone{}
@@ -139,3 +140,41 @@ func UpdateDroneBattery(db *db.DB) {
 		worker.Historylog("Drone with Serial:",v.SerialNum,"Has Battery:",v.BatteryCap,"%")
 	}
 } 
+
+//update loaded drons to DELIVERING, will run it every 2 mins
+//NODE:we create this cron as simulation for drone delivering functionality 
+func UpdateDroneToDelevering() {
+	var newDB db.Database
+	newDB = db.NewPostgres()
+	db := newDB.Open()
+	defer db.Close()
+	
+	if err := db.GormDB.Model(&entity.Drone{}).Where("status = 3 ").Update("status",4).Error ; err != nil {
+		worker.Historylog("error update status for all drones with status 3 [loaded]...")
+	}
+}
+
+//update delivering to delivered will run every 5 min
+//NODE:we create this cron as simulation for drone delivering functionality 
+func UpdateDroneToDelevered() {
+	var newDB db.Database
+	newDB = db.NewPostgres()
+	db := newDB.Open()
+	defer db.Close()
+	
+	if err := db.GormDB.Model(&entity.Drone{}).Where("status = 4 ").Update("status",5).Error ; err != nil {
+		worker.Historylog("error update status for all drones with status 4 [delivering]...")
+	}
+}
+
+//update delivering to delivered will run every 3 min
+func UpdateDroneToReturing() {
+	var newDB db.Database
+	newDB = db.NewPostgres()
+	db := newDB.Open()
+	defer db.Close()
+	
+	if err := db.GormDB.Model(&entity.Drone{}).Where("status = 5 ").Update("status",6).Error ; err != nil {
+		worker.Historylog("error update status for all drones with status 5 [delivered]...")
+	}
+}

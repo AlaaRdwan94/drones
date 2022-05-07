@@ -13,6 +13,7 @@ type DroneData struct {
 	Weight          float32 `json:"weight"`
 	BatteryCapacity float32 `json:"battery_capacity"`
 	Status          string  `json:"status"`
+	MedicationData *[]MedicationData `json:"medications"`
 }
 
 func (d *DroneData) GenerateSerial() {

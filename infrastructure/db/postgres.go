@@ -29,7 +29,7 @@ func (mysql *Postgres) Open() *DB {
 	if err != nil {
 		panic(err)
 	}
-	m := db.AutoMigrate(&entity.Status{},&entity.Drone{},&entity.Medication{})
+	m := db.AutoMigrate(&entity.Status{},&entity.Drone{},&entity.Medication{},&entity.DroneMedication{})
 
 	if m != nil && m.Error != nil {
 		//We have an error
