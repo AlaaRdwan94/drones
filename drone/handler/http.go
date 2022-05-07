@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"task/drone"
@@ -56,13 +57,15 @@ func (d *DroneHandler) Load(c *gin.Context) {
 	c.JSON(http.StatusCreated,returned)
 }
 
+//request for get by serial number APIs
+type request struct {
+	Serial string `json:"serial"`
+}
+
 //Get drone medications
 func (d *DroneHandler) GetDroneMedications(c *gin.Context) {
 
 	c.Writer.Header().Set("Content-Type", "application/json")
-	type request struct {
-		Serial string `json:"serial"`
-	}
 	req := request{}
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		log.Printf("%+v", err)
@@ -87,6 +90,30 @@ func (d *DroneHandler) CheckLoadingDrones(c *gin.Context) {
 	c.JSON(http.StatusAccepted,returned)
 }
 
+//Get drone medications
+func (d *DroneHandler) GetDroneBattery(c *gin.Context) {
+
+	c.Writer.Header().Set("Content-Type", "application/json")
+	type request struct {
+		Serial string `json:"serial"`
+	}
+	req := request{}
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		log.Printf("%+v", err)
+	}
+	
+	returned , err := d.Dusecase.GetDroneBatteryCap(req.Serial)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError,err.Error())
+		return
+	}
+	type response struct {
+		BatteryCap string `json:"battery-capacity"`
+	}
+	res := response{}
+	res.BatteryCap = fmt.Sprintf("%v",returned ) + "%"
+	c.JSON(http.StatusAccepted,res)
+}
 
 func NewDroneHandler(e *gin.RouterGroup, dus drone.Usecase)  {
 	handler := &DroneHandler{Dusecase: dus}
@@ -94,5 +121,6 @@ func NewDroneHandler(e *gin.RouterGroup, dus drone.Usecase)  {
 	e.POST("/load",handler.Load)
 	e.GET("/medications",handler.GetDroneMedications)
 	e.GET("/loading-drones",handler.CheckLoadingDrones)
+	e.GET("/drone-battery",handler.GetDroneBattery)
 
 }

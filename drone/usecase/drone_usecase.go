@@ -12,6 +12,15 @@ type DroneUsecase struct {
 	DroneRepo drone.Repositoy
 }
 
+// GetDroneBatteryCap implements drone.Usecase
+func (d *DroneUsecase) GetDroneBatteryCap(serial string) (float32, error) {
+	drone, err := d.DroneRepo.GetDroneBySerialNum(serial)
+	if err != nil {
+		return 0, err
+	}
+	return drone.BatteryCap , nil
+}
+
 // GetLoadingDrone implements drone.Usecase
 func (d *DroneUsecase) GetLoadingDrone() (*[]model.DroneData, error) {
 	drones, err := d.DroneRepo.GetLoadingDrone()
@@ -20,14 +29,14 @@ func (d *DroneUsecase) GetLoadingDrone() (*[]model.DroneData, error) {
 	}
 	arr := []model.DroneData{}
 	for _, v := range *drones {
-		medications , err := d.DroneRepo.GetDroneMedications(v.SerialNum)
+		medications, err := d.DroneRepo.GetDroneMedications(v.SerialNum)
 		if err != nil {
 			return nil, err
 		}
-		data := transformer.GetDroneDataWithMedicationTransform(&v,medications, v.SerialNum)
+		data := transformer.GetDroneDataWithMedicationTransform(&v, medications, v.SerialNum)
 		arr = append(arr, *data)
 	}
-	return &arr , nil
+	return &arr, nil
 }
 
 // GetDroneMedications implements drone.Usecase
