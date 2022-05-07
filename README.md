@@ -49,3 +49,5 @@ please do not hesitate to reply to me if there is a new requirements for this ta
     - run `go run .`
 
 
+## Test
+   - postman collection : https://www.getpostman.com/collections/6680786f8c59556a097d
