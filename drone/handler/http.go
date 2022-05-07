@@ -26,13 +26,17 @@ func (d *DroneHandler) RegisterDrone(c *gin.Context) {
 	drone.GenerateSerial()
 	returned , err := d.Dusecase.Register(&drone)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,err.Error())
+		msg := response{}
+		msg.ErrorMsq = err.Error()
+		c.JSON(http.StatusInternalServerError,msg)
 		return
 	}
 
 	token, err := auth.CreateToken(returned.Serial)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized,err.Error())
+		msg := response{}
+		msg.ErrorMsq = err.Error()
+		c.JSON(http.StatusInternalServerError,msg)
 		return
 	}
 	returned.Token = token
@@ -51,7 +55,9 @@ func (d *DroneHandler) Load(c *gin.Context) {
 	
 	returned , err := d.Dusecase.AddMedication(req.Serial ,req.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,err.Error())
+		msg := response{}
+		msg.ErrorMsq = err.Error()
+		c.JSON(http.StatusInternalServerError,msg)
 		return
 	}
 	c.JSON(http.StatusCreated,returned)
@@ -61,7 +67,10 @@ func (d *DroneHandler) Load(c *gin.Context) {
 type request struct {
 	Serial string `json:"serial"`
 }
-
+//TODO: add the response body for error
+type response struct{
+	ErrorMsq string `json:"error"`
+}
 //Get drone medications
 func (d *DroneHandler) GetDroneMedications(c *gin.Context) {
 
@@ -73,7 +82,9 @@ func (d *DroneHandler) GetDroneMedications(c *gin.Context) {
 	
 	returned , err := d.Dusecase.GetDroneMedications(req.Serial)
 	if err != nil || returned == nil{
-		c.JSON(http.StatusInternalServerError,err.Error())
+		msg := response{}
+		msg.ErrorMsq = err.Error()
+		c.JSON(http.StatusInternalServerError,msg)
 		return
 	}
 	c.JSON(http.StatusAccepted,returned)
@@ -84,7 +95,9 @@ func (d *DroneHandler) CheckLoadingDrones(c *gin.Context) {
 	
 	returned , err := d.Dusecase.GetLoadingDrone()
 	if err != nil || returned == nil{
-		c.JSON(http.StatusInternalServerError,err.Error())
+		msg := response{}
+		msg.ErrorMsq = err.Error()
+		c.JSON(http.StatusInternalServerError,msg)
 		return
 	}
 	c.JSON(http.StatusAccepted,returned)
